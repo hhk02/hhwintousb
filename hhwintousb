@@ -70,7 +70,7 @@ if [ $EUID -eq 0 ]; then
                 echo "# Making partition as NTFS...." ; sleep 1
                 parted /dev/"$device_select" mkpart primary ntfs 1MB 100% ; sleep 1
                 parted /dev/"$device_select" set 1 boot on ; sleep 1
-                mkfs.ntfs --quick "$device_select"1
+                mkfs.ntfs --quick /dev/"$device_select"1
                 echo "50" ; sleep 1
                 mkdir /mnt/iso
                 mkdir /mnt/target
