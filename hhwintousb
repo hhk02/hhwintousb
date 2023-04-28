@@ -83,9 +83,9 @@ if [ $EUID -eq 0 ]; then
                 echo "75" ; sleep 1
                 echo "# Installing grub for make USB booteable"
                 if [ -f /usr/sbin/grub2-mkconfig ]; then
-                    grub2-install --target=i386-pc --boot-directory=/mnt/target/boot --removable /dev/"$device_select" ; sleep 1
+                    grub2-install --target=i386-pc --boot-directory=/mnt/target/boot --removable "$device_select" ; sleep 1
                 else
-                    grub-install --target=i386-pc --boot-directory=/mnt/target/boot --removable /dev/"$device_select" ; sleep 1
+                    grub-install --target=i386-pc --boot-directory=/mnt/target/boot --removable "$device_select" ; sleep 1
                 fi
                 echo "95" ; sleep 1
             } |
