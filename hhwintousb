@@ -62,14 +62,15 @@ if [ $EUID -eq 0 ]; then
             {
                 echo "10" ; sleep 1
                 echo "# Wiping $device_select" ; sleep 1
-                wipefs -a "$device_select" ; sleep 1
+                wipefs -a /dev/"$device_select" ; sleep 1
                 echo "20" ; sleep 1
                 echo "# Making partition table...." ; sleep 1
-                parted "$device_select" mklabel msdos ; sleep 1
+                parted /dev/"$device_select" mklabel msdos ; sleep 1
                 echo "30" ; sleep 1
                 echo "# Making partition as NTFS...." ; sleep 1
-                parted "$device_select" mkpart primary ntfs 0% 100% ; sleep 1
-                parted "$device_select" set 1 boot on ; sleep 1
+                parted /dev/"$device_select" mkpart primary ntfs 1MB 100% ; sleep 1
+                parted /dev/"$device_select" set 1 boot on ; sleep 1
+                mkfs.ntfs --quick "$device_select"1
                 echo "50" ; sleep 1
                 mkdir /mnt/iso
                 mkdir /mnt/target
