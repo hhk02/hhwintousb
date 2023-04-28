@@ -27,7 +27,7 @@ if [ $EUID -eq 0 ]; then
     --text="Welcome to WinToUSB 0.1 alpha this it's a experimental script please use your responsability"
 
     zenity --info \
-    --text="For start, please select the Windows ISO... Legacy supported only for the moment!"
+    --text="For start, please select the Windows ISO... "
     mountiso=$(zenity --file-selection --title="Select a Windows ISO")
 
     case $? in
@@ -68,9 +68,12 @@ if [ $EUID -eq 0 ]; then
                 parted /dev/"$device_select" mklabel msdos ; sleep 1
                 echo "30" ; sleep 1
                 echo "# Making partition as NTFS...." ; sleep 1
-                parted /dev/"$device_select" mkpart primary ntfs 1MB 100% ; sleep 1
-                parted /dev/"$device_select" set 1 boot on ; sleep 1
-                mkfs.ntfs --quick /dev/"$device_select"1
+                parted /dev/"$device_select" mkpart primary fat32 1MB 512MB; sleep 1
+                wget https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-ntfs.img
+                dd if=uefi-ntfs.img of="/dev/$device_select"1
+                parted /dev/"$device_select" mkpart primary ntfs 1MB 100%; sleep 1
+                parted /dev/"$device_select" set 2 boot on ; sleep 1
+                mkfs.ntfs --quick /dev/"$device_select"2
                 echo "50" ; sleep 1
                 mkdir /mnt/iso
                 mkdir /mnt/target
@@ -80,7 +83,11 @@ if [ $EUID -eq 0 ]; then
                 cp -rvf /mnt/iso/* /mnt/target/ ; sleep 1
                 echo "75" ; sleep 1
                 echo "# Installing grub for make USB booteable"
-                grub-install --target=i386-pc --boot-directory=/mnt/target/boot --removable /dev/"$device_select" ; sleep 1
+                if [ -f /usr/sbin/grub2-mkconfig ]; then
+                    grub2-install --target=i386-pc --boot-directory=/mnt/target/boot --removable /dev/"$device_select" ; sleep 1
+                else
+                    grub-install --target=i386-pc --boot-directory=/mnt/target/boot --removable /dev/"$device_select" ; sleep 1
+                fi
                 echo "95" ; sleep 1
             } |
             zenity --progress \
@@ -91,12 +98,13 @@ if [ $EUID -eq 0 ]; then
 
             if [ -f /usr/sbin/grub2-mkconfig ]; then
                 cd /mnt/target/boot/grub2
-                wget https://raw.githubusercontent.com/hhk02/hhwintousb/grub.cfg
+                wget https://raw.githubusercontent.com/hhk02/hhwintousb/main/grub.cfg
             else
                 cd /mnt/target/boot/grub
-                wget https://raw.githubusercontent.com/hhk02/hhwintousb/grub.cfg
+                wget https://raw.githubusercontent.com/hhk02/hhwintousb/main/grub.cfg
             fi
-
+            umount -l -f /mnt/iso
+            umount -l -f /mnt/target
             zenity --info \
             --text="USB Has created.... now reboot your computer and boot with usb!"
         else
