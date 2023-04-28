@@ -112,5 +112,5 @@ if [ $EUID -eq 0 ]; then
         fi
 else
     echo "ERROR : Please run as root!"
-    pkexec ./hhwintousb
+    pkexec
 fi
