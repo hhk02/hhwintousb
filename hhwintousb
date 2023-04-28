@@ -2,10 +2,8 @@
 # Windows to USB SCRIPT BY HH02 (isaacfhl)
 
 
-for devices in /dev/*
-do
-    echo "$devices" | grep sd
-done
+devices=$(find /dev | grep sd)
+
 
 export device_select=""
 
@@ -63,24 +61,24 @@ if [ $EUID -eq 0 ]; then
             {
                 echo "10" ; sleep 1
                 echo "# Wiping $device_select" ; sleep 1
-                wipefs -a /dev/"$device_select" ; sleep 1
+                wipefs -a "$device_select" ; sleep 1
                 echo "20" ; sleep 1
                 echo "# Making partition table...." ; sleep 1
-                parted /dev/"$device_select" mklabel msdos ; sleep 1
+                parted "$device_select" mklabel msdos ; sleep 1
                 echo "30" ; sleep 1
                 echo "# Making partitions..." ; sleep 1
-                parted /dev/"$device_select" mkpart primary fat32 1MB 512MB; sleep 1
+                parted "$device_select" mkpart primary fat32 1MB 512MB; sleep 1
                 wget https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-ntfs.img
-                dd if=uefi-ntfs.img of="/dev/$device_select"1
-                parted /dev/"$device_select" mkpart primary ntfs 1MB 100%; sleep 1
-                parted /dev/"$device_select" set 2 boot on ; sleep 1
-                mkfs.ntfs --quick /dev/"$device_select"2
+                dd if=uefi-ntfs.img of="$device_select"1
+                parted "$device_select" mkpart primary ntfs 1MB 100%; sleep 1
+                parted "$device_select" set 2 boot on ; sleep 1
+                mkfs.ntfs --quick "$device_select"2
                 echo "50" ; sleep 1
                 mkdir /mnt/iso
                 mkdir /mnt/target
                 mount -t auto "$mountiso" /mnt/iso
                 echo "# Copying files...."
-                mount /dev/"$device_select"1 /mnt/target
+                mount "$device_select"1 /mnt/target
                 cp -rvf /mnt/iso/* /mnt/target/ ; sleep 1
                 echo "75" ; sleep 1
                 echo "# Installing grub for make USB booteable"
