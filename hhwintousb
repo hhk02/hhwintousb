@@ -67,7 +67,7 @@ if [ $EUID -eq 0 ]; then
                 echo "# Making partition table...." ; sleep 1
                 parted /dev/"$device_select" mklabel msdos ; sleep 1
                 echo "30" ; sleep 1
-                echo "# Making partition as NTFS...." ; sleep 1
+                echo "# Making partitions..." ; sleep 1
                 parted /dev/"$device_select" mkpart primary fat32 1MB 512MB; sleep 1
                 wget https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-ntfs.img
                 dd if=uefi-ntfs.img of="/dev/$device_select"1
@@ -91,16 +91,16 @@ if [ $EUID -eq 0 ]; then
                 echo "95" ; sleep 1
             } |
             zenity --progress \
-            --title="Making filesystem" \
-            --text="Erasing $device_select" \
+            --title="Progress" \
+            --text="Erasing and wiping $device_select" \
             --percentage=0
             fi
 
             if [ -f /usr/sbin/grub2-mkconfig ]; then
-                cd /mnt/target/boot/grub2
+                cd /mnt/target/boot/grub2 || return
                 wget https://raw.githubusercontent.com/hhk02/hhwintousb/main/grub.cfg
             else
-                cd /mnt/target/boot/grub
+                cd /mnt/target/boot/grub || return
                 wget https://raw.githubusercontent.com/hhk02/hhwintousb/main/grub.cfg
             fi
             umount -l -f /mnt/iso
