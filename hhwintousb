@@ -24,7 +24,7 @@ if [ $EUID -eq 0 ]; then
         echo "Done!"
     fi
     zenity --warning \
-    --text="Welcome to WinToUSB 0.1 alpha this it's a experimental script please use your responsability"
+    --text="Welcome to WinToUSB 1.0 this it's a experimental script please use your responsability"
 
     zenity --info \
     --text="For start, please select the Windows ISO... "
