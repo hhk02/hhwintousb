@@ -2,11 +2,12 @@
 # Windows to USB SCRIPT BY HH02 (isaacfhl)
 
 
-devices=$(ls /dev | grep sd)
+for devices in /dev/*
+do
+    echo "$devices" | grep sd
+done
 
 export device_select=""
-
-
 
 if [ $EUID -eq 0 ]; then
 
@@ -112,5 +113,4 @@ if [ $EUID -eq 0 ]; then
         fi
 else
     echo "ERROR : Please run as root!"
-    pkexec
 fi
