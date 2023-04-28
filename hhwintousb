@@ -1,0 +1,106 @@
+#!/bin/bash
+# Windows to USB SCRIPT BY HH02 (isaacfhl)
+
+
+devices=$(ls /dev | grep sd)
+
+export device_select=""
+
+
+
+if [ $EUID -eq 0 ]; then
+
+    if [ ! -f /usr/bin/zenity ]; then
+        echo "Installing zenity!"
+        if [ -f /usr/bin/pacman ]; then
+            pacman -S zenity --noconfirm
+        fi
+        if [ -f /usr/bin/apt ]; then
+            apt install zenity -y
+        fi
+        if [ -f /usr/bin/dnf ]; then
+            dnf install zenity -y
+        fi
+        echo "Done!"
+    fi
+    zenity --warning \
+    --text="Welcome to WinToUSB 0.1 alpha this it's a experimental script please use your responsability"
+
+    zenity --info \
+    --text="For start, please select the Windows ISO... Legacy supported only for the moment!"
+    mountiso=$(zenity --file-selection --title="Select a Windows ISO")
+
+    case $? in
+        0) 
+            echo "Selected" "$mountiso";;
+        1)
+            echo "No file selected!";;
+        -1)
+            echo "Unexpected error has occurred!";;
+    esac
+
+
+    device_select=$(zenity --list \
+    --title="Choose your target device" \
+    --column="Device" \
+    --text="Select the device. DONT USE A PARTITION!" \
+    $devices
+    )
+    device_selected=$?
+        if [ $device_selected -eq 0 ]; then
+            echo "$device_select"
+            if [ -z "$device_select" ]; then
+                zenity --error \
+                --text="Please select a disk!"
+                device_select=$(zenity --list \
+                --title="Choose your target device" \
+                --column="Device" \
+                --text="Select the device. DONT USE A PARTITION!" \
+                $devices
+                )
+            else
+            {
+                echo "10" ; sleep 1
+                echo "# Wiping $device_select" ; sleep 1
+                wipefs -a "$device_select" ; sleep 1
+                echo "20" ; sleep 1
+                echo "# Making partition table...." ; sleep 1
+                parted "$device_select" mklabel msdos ; sleep 1
+                echo "30" ; sleep 1
+                echo "# Making partition as NTFS...." ; sleep 1
+                parted "$device_select" mkpart primary ntfs 0% 100% ; sleep 1
+                parted "$device_select" set 1 boot on ; sleep 1
+                echo "50" ; sleep 1
+                mkdir /mnt/iso
+                mkdir /mnt/target
+                mount -t auto "$mountiso" /mnt/iso
+                echo "# Copying files...."
+                mount /dev/"$device_select"1 /mnt/target
+                cp -rvf /mnt/iso/* /mnt/target/ ; sleep 1
+                echo "75" ; sleep 1
+                echo "# Installing grub for make USB booteable"
+                grub-install --target=i386-pc --boot-directory=/mnt/target/boot --removable /dev/"$device_select" ; sleep 1
+                echo "95" ; sleep 1
+            } |
+            zenity --progress \
+            --title="Making filesystem" \
+            --text="Erasing $device_select" \
+            --percentage=0
+            fi
+
+            if [ -f /usr/sbin/grub2-mkconfig ]; then
+                cd /mnt/target/boot/grub2
+                wget https://raw.githubusercontent.com/hhk02/hhwintousb/grub.cfg
+            else
+                cd /mnt/target/boot/grub
+                wget https://raw.githubusercontent.com/hhk02/hhwintousb/grub.cfg
+            fi
+
+            zenity --info \
+            --text="USB Has created.... now reboot your computer and boot with usb!"
+        else
+            echo "Canceling..."
+        fi
+else
+    echo "ERROR : Please run as root!"
+fi
