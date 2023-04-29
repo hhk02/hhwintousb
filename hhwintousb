@@ -64,14 +64,14 @@ if [ $EUID -eq 0 ]; then
                 wipefs -a "$device_select" ; sleep 1
                 echo "20" ; sleep 1
                 echo "# Making partition table...." ; sleep 1
-                parted "$device_select" mklabel msdos ; sleep 1
+                parted "$device_select" mklabel gpt ; sleep 1
                 echo "30" ; sleep 1
                 echo "# Making partitions..." ; sleep 1
                 parted -s "$device_select" mkpart primary fat32 1MB 1024MB ; sleep 1
                 wget https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-ntfs.img
                 dd if=uefi-ntfs.img of="$device_select"1
                 parted -s "$device_select" mkpart primary ntfs 1025MB 100%; sleep 1
-                parted "$device_select" set 2 boot on ; sleep 1
+                parted "$device_select" set 2 bios_grub on ; sleep 1
                 mkfs.ntfs --quick "$device_select"2
                 echo "50" ; sleep 1
                 mkdir /mnt/iso
