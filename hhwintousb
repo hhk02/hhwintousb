@@ -42,7 +42,7 @@ if [ $EUID -eq 0 ]; then
     device_select=$(zenity --list \
     --title="Choose your target device" \
     --column="Device" \
-    --text="Select the device. DONT USE A PARTITION!" \
+    --text="Select the device. DONT USE A PARTITION! ALL PARTITIONS WILL BE DESTROYED!" \
     $devices
     )
     device_selected=$?
@@ -59,15 +59,16 @@ if [ $EUID -eq 0 ]; then
                 )
             else
             {
+                umount -f -l "$device_select"*
                 echo "10" ; sleep 1
                 echo "# Wiping $device_select" ; sleep 1
-                wipefs -a "$device_select" ; sleep 1
+                sgdisk -Z "$device_select" ; sleep 1
                 echo "20" ; sleep 1
                 echo "# Making partition table...." ; sleep 1
                 parted "$device_select" mklabel gpt ; sleep 1
                 echo "30" ; sleep 1
                 echo "# Making partitions..." ; sleep 1
-                parted -s "$device_select" mkpart primary fat32 1MB 1024MB ; sleep 1
+                parted -s "$device_select" mkpart primary fat32 1% 1024MB ; sleep 1
                 wget https://raw.githubusercontent.com/pbatard/rufus/master/res/uefi/uefi-ntfs.img
                 dd if=uefi-ntfs.img of="$device_select"1
                 parted -s "$device_select" mkpart primary ntfs 1025MB 100%; sleep 1
