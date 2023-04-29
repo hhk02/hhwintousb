@@ -85,14 +85,15 @@ if [ $EUID -eq 0 ]; then
                 echo "95" ; sleep 1
                 umount -l -f /mnt/target
                 echo "100" ; sleep 1
-                zenity --info \
-                --text="USB Has created.... now reboot your computer and boot with usb!"
             } |
             zenity --progress \
             --title="Progress" \
             --text="Erasing and wiping $device_select" \
             --percentage=0
             fi
+            
+            zenity --info \
+            --text="USB Has created.... now reboot your computer and boot with usb!"
         else
             echo "Canceling..."
         fi
