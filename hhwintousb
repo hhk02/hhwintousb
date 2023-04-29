@@ -97,10 +97,10 @@ if [ $EUID -eq 0 ]; then
 
             if [ -f /usr/sbin/grub2-mkconfig ]; then
                 cd /mnt/target/boot/grub2 || return
-                wget https://raw.githubusercontent.com/hhk02/hhwintousb/main/grub.cfg
+                wget https://raw.githubusercontent.com/hhk02/hhwintousb/master/grub.cfg
             else
                 cd /mnt/target/boot/grub || return
-                wget https://raw.githubusercontent.com/hhk02/hhwintousb/main/grub.cfg
+                wget https://raw.githubusercontent.com/hhk02/hhwintousb/master/grub.cfg
             fi
             umount -l -f /mnt/iso
             umount -l -f /mnt/target
