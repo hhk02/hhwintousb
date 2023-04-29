@@ -23,7 +23,7 @@ if [ $EUID -eq 0 ]; then
         echo "Done!"
     fi
     zenity --warning \
-    --text="Welcome to WinToUSB 1.0 this it's a experimental script please use your responsability"
+    --text="Welcome to WinToUSB 1.0 this it's a experimental script please use your responsability THIS SUPPORTS FOR UEFI ONLY!"
 
     zenity --info \
     --text="For start, please select the Windows ISO... "
@@ -64,7 +64,7 @@ if [ $EUID -eq 0 ]; then
                 wipefs -a "$device_select" ; sleep 1
                 echo "20" ; sleep 1
                 echo "# Making partition table...." ; sleep 1
-                parted "$device_select" mklabel msdos ; sleep 1
+                parted "$device_select" mklabel gpt ; sleep 1
                 echo "30" ; sleep 1
                 echo "# Making partitions..." ; sleep 1
                 parted -s "$device_select" mkpart primary fat32 1MB 1024MB ; sleep 1
@@ -81,29 +81,16 @@ if [ $EUID -eq 0 ]; then
                 mount "$device_select"2 /mnt/target
                 cp -rvf /mnt/iso/* /mnt/target/ ; sleep 1
                 echo "75" ; sleep 1
-                echo "# Installing grub for make USB booteable"
-                if [ -f /usr/sbin/grub2-mkconfig ]; then
-                    grub2-install --target=i386-pc --boot-directory=/mnt/target/boot --removable "$device_select" ; sleep 1
-                else
-                    grub-install --target=i386-pc --boot-directory=/mnt/target/boot --removable "$device_select" ; sleep 1
-                fi
+                umount -l -f /mnt/iso
                 echo "95" ; sleep 1
+                umount -l -f /mnt/target
+                echo "100" ; sleep 1
             } |
             zenity --progress \
             --title="Progress" \
             --text="Erasing and wiping $device_select" \
             --percentage=0
             fi
-
-            if [ -f /usr/sbin/grub2-mkconfig ]; then
-                cd /mnt/target/boot/grub2 || return
-                wget https://raw.githubusercontent.com/hhk02/hhwintousb/master/grub.cfg
-            else
-                cd /mnt/target/boot/grub || return
-                wget https://raw.githubusercontent.com/hhk02/hhwintousb/master/grub.cfg
-            fi
-            umount -l -f /mnt/iso
-            umount -l -f /mnt/target
             zenity --info \
             --text="USB Has created.... now reboot your computer and boot with usb!"
         else
